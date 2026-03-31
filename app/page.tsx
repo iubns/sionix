@@ -73,25 +73,41 @@ export default function Home() {
         </p>
         <h1 className="mt-6 max-w-4xl text-3xl font-black leading-tight text-slate-900 sm:text-5xl">
           AI 솔루션 소개자료
-          <span className="block text-sky-700">결제 즉시 배정되는 독립형 AI 에이전트 서버</span>
+          <span className="block text-sky-700">
+            결제 즉시 배정되는 독립형 AI 에이전트 서버
+          </span>
         </h1>
         <p className="mt-6 max-w-3xl text-base leading-relaxed text-slate-600 sm:text-lg">
-          하드웨어 구매나 복잡한 설치 없이, 사용자 API 키만 입력하면 바로 운영 가능한 AI 자동화 환경을 제공합니다.
-          24시간 무중단 구동, 비동기 메시징, 자동 복구, 외부 LLM 연동까지 SaaS 방식으로 즉시 시작할 수 있습니다.
+          하드웨어 구매나 복잡한 설치 없이, 사용자 API 키만 입력하면 바로 운영
+          가능한 AI 자동화 환경을 제공합니다. 24시간 무중단 구동, 비동기 메시징,
+          자동 복구, 외부 LLM 연동까지 SaaS 방식으로 즉시 시작할 수 있습니다.
         </p>
 
         <div className="mt-8 grid gap-3 text-sm text-slate-700 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">1인 1서버 즉시 할당</div>
-          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">외부 LLM API 연동 지원</div>
-          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">비동기 이벤트 기반 자동화</div>
-          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">Self-Healing 24시간 운용</div>
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+            1인 1서버 즉시 할당
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+            외부 LLM API 연동 지원
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+            비동기 이벤트 기반 자동화
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+            Self-Healing 24시간 운용
+          </div>
         </div>
       </section>
 
       <section className="reveal reveal-delay-1 relative mx-auto mt-12 max-w-6xl">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <h2 className="text-2xl font-extrabold text-slate-900 sm:text-3xl">플랜별 솔루션 구성</h2>
-          <p className="text-sm text-slate-500">플랫폼 등록 기준: 월정액(구독) / 용량 기반 / 크레딧·토큰 무료+유료 혼합</p>
+          <h2 className="text-2xl font-extrabold text-slate-900 sm:text-3xl">
+            플랜별 솔루션 구성
+          </h2>
+          <p className="text-sm text-slate-500">
+            플랫폼 등록 기준: 월정액(구독) / 용량 기반 / 크레딧·토큰 무료+유료
+            혼합
+          </p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
@@ -100,17 +116,25 @@ export default function Home() {
               key={solution.tier}
               className="group relative overflow-hidden rounded-3xl border border-slate-900/10 bg-white p-6 shadow-[0_20px_50px_-30px_rgba(15,23,42,0.45)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_30px_60px_-28px_rgba(2,132,199,0.4)]"
             >
-              <div className={`absolute inset-x-0 top-0 h-28 bg-gradient-to-r ${solution.accent}`} />
+              <div
+                className={`absolute inset-x-0 top-0 h-28 bg-gradient-to-r ${solution.accent}`}
+              />
               <div className="relative">
                 <div className="flex items-center justify-between">
                   <span className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-bold tracking-wide text-slate-700">
                     {solution.tier}
                   </span>
-                  <span className="text-xs font-medium text-slate-500">AI 에이전트 + 전용 서버</span>
+                  <span className="text-xs font-medium text-slate-500">
+                    AI 에이전트 + 전용 서버
+                  </span>
                 </div>
 
-                <h3 className="mt-5 text-xl font-black leading-snug text-slate-900">{solution.name}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">{solution.summary}</p>
+                <h3 className="mt-5 text-xl font-black leading-snug text-slate-900">
+                  {solution.name}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                  {solution.summary}
+                </p>
 
                 <div className="mt-5 flex flex-wrap gap-2">
                   {solution.specs.map((spec) => (
@@ -149,10 +173,15 @@ export default function Home() {
 
       <section className="reveal reveal-delay-2 relative mx-auto mt-12 grid max-w-6xl gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <article className="rounded-3xl border border-slate-900/10 bg-white/90 p-6 shadow-[0_20px_50px_-35px_rgba(15,23,42,0.5)] sm:p-8">
-          <h4 className="text-xl font-extrabold text-slate-900">공통 서비스 제공 범위 및 가이드</h4>
+          <h4 className="text-xl font-extrabold text-slate-900">
+            공통 서비스 제공 범위 및 가이드
+          </h4>
           <div className="mt-5 grid gap-3 text-sm leading-relaxed text-slate-700 sm:grid-cols-2">
             {commonGuide.map((item) => (
-              <div key={item} className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <div
+                key={item}
+                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
+              >
                 {item}
               </div>
             ))}
@@ -172,7 +201,9 @@ export default function Home() {
             </div>
             <div>
               <dt className="font-semibold text-slate-900">가격 기준 안내</dt>
-              <dd className="mt-1">플랫폼 등록 금액은 2개월 기준이며 VAT 포함 가격입니다.</dd>
+              <dd className="mt-1">
+                플랫폼 등록 금액은 2개월 기준이며 VAT 포함 가격입니다.
+              </dd>
             </div>
           </dl>
         </article>
