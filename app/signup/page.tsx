@@ -1,6 +1,58 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 
 export default function SignupPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    if (password !== confirmPassword) {
+      setErrorMessage("비밀번호 확인이 일치하지 않습니다.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, confirmPassword }),
+      });
+
+      const data = (await response.json()) as {
+        success?: boolean;
+        message?: string;
+      };
+
+      if (!response.ok || !data.success) {
+        setErrorMessage(data.message ?? "회원가입에 실패했습니다.");
+        return;
+      }
+
+      setSuccessMessage(data.message ?? "회원가입이 완료되었습니다.");
+      setTimeout(() => {
+        router.push("/login");
+      }, 900);
+    } catch {
+      setErrorMessage("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <main className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-[radial-gradient(circle_at_12%_0%,rgba(16,185,129,0.16),transparent_36%),radial-gradient(circle_at_88%_0%,rgba(14,165,233,0.18),transparent_36%),linear-gradient(180deg,#f8fbff_0%,#edf7f8_45%,#f3f8ff_100%)] px-4 py-10 sm:px-8">
       <div className="pointer-events-none absolute inset-0 opacity-50 [background:linear-gradient(to_right,rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] [background-size:54px_54px]" />
@@ -18,7 +70,7 @@ export default function SignupPage() {
               이메일과 비밀번호를 입력하고 비밀번호 확인까지 완료해 주세요.
             </p>
 
-            <form className="mt-8 space-y-4">
+            <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
               <div>
                 <label
                   htmlFor="email"
@@ -33,6 +85,8 @@ export default function SignupPage() {
                   required
                   autoComplete="email"
                   placeholder="you@company.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                 />
               </div>
@@ -52,6 +106,8 @@ export default function SignupPage() {
                   autoComplete="new-password"
                   minLength={8}
                   placeholder="8자 이상 입력"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                 />
               </div>
@@ -71,15 +127,30 @@ export default function SignupPage() {
                   autoComplete="new-password"
                   minLength={8}
                   placeholder="비밀번호를 다시 입력하세요"
+                  value={confirmPassword}
+                  onChange={(event) => setConfirmPassword(event.target.value)}
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                 />
               </div>
 
+              {errorMessage ? (
+                <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">
+                  {errorMessage}
+                </p>
+              ) : null}
+
+              {successMessage ? (
+                <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
+                  {successMessage}
+                </p>
+              ) : null}
+
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-500"
               >
-                회원가입하기
+                {isSubmitting ? "가입 중..." : "회원가입하기"}
               </button>
             </form>
 

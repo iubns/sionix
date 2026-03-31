@@ -1,6 +1,51 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = (await response.json()) as {
+        success?: boolean;
+        message?: string;
+      };
+
+      if (!response.ok || !data.success) {
+        setErrorMessage(data.message ?? "로그인에 실패했습니다.");
+        return;
+      }
+
+      setSuccessMessage(data.message ?? "로그인에 성공했습니다.");
+      setTimeout(() => {
+        router.push("/");
+      }, 700);
+    } catch {
+      setErrorMessage("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <main className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-[radial-gradient(circle_at_0%_0%,rgba(14,165,233,0.18),transparent_35%),radial-gradient(circle_at_100%_0%,rgba(16,185,129,0.18),transparent_35%),linear-gradient(180deg,#f8fbff_0%,#edf5ff_45%,#f3faf4_100%)] px-4 py-10 sm:px-8">
       <div className="pointer-events-none absolute inset-0 opacity-50 [background:linear-gradient(to_right,rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] [background-size:54px_54px]" />
@@ -39,7 +84,7 @@ export default function LoginPage() {
               등록된 계정으로 접속하여 AI 에이전트 환경을 시작하세요.
             </p>
 
-            <form className="mt-8 space-y-4">
+            <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
               <div>
                 <label
                   htmlFor="email"
@@ -54,6 +99,8 @@ export default function LoginPage() {
                   required
                   autoComplete="email"
                   placeholder="you@company.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
                 />
               </div>
@@ -72,15 +119,30 @@ export default function LoginPage() {
                   required
                   autoComplete="current-password"
                   placeholder="비밀번호를 입력하세요"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
                 />
               </div>
 
+              {errorMessage ? (
+                <p className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">
+                  {errorMessage}
+                </p>
+              ) : null}
+
+              {successMessage ? (
+                <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
+                  {successMessage}
+                </p>
+              ) : null}
+
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
               >
-                로그인하기
+                {isSubmitting ? "로그인 중..." : "로그인하기"}
               </button>
             </form>
 

@@ -54,12 +54,27 @@ export async function signup(input: SignupInput): Promise<PublicUser> {
     return toPublicUser(user);
   } catch (error) {
     const message = error instanceof Error ? error.message : "DB 오류";
+    const errorCode =
+      typeof error === "object" && error !== null
+        ? String(
+            (error as { code?: unknown; driverError?: { code?: unknown } }).
+              code ??
+              (error as { driverError?: { code?: unknown } }).driverError?.code ??
+              "",
+          )
+        : "";
 
-    if (message.includes("duplicate key") || message.includes("users_email_key")) {
+    if (
+      errorCode === "23505" ||
+      message.includes("duplicate key") ||
+      message.includes("users_email_key")
+    ) {
       throw new AuthError("이미 가입된 이메일입니다.");
     }
 
-    throw new InternalAuthServiceError("회원가입 처리 중 DB 오류가 발생했습니다.");
+    throw new InternalAuthServiceError(
+      "회원가입 처리 중 DB 오류가 발생했습니다.",
+    );
   }
 }
 

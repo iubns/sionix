@@ -1,28 +1,32 @@
-import { query } from "@/lib/server/db";
+import { getDataSource } from "@/lib/server/typeorm/data-source";
+import {
+  type UserEntity,
+  UserEntitySchema,
+} from "@/lib/server/typeorm/entities/user.entity";
 import type { UserRecord } from "@/lib/server/types/auth";
 
 function toEmailKey(email: string): string {
   return email.trim().toLowerCase();
 }
 
-function toUserRecord(row: Record<string, unknown>): UserRecord {
+function toUserRecord(row: UserEntity): UserRecord {
   return {
-    id: String(row.id),
-    email: String(row.email),
-    passwordHash: String(row.password_hash),
+    id: row.id,
+    email: row.email,
+    passwordHash: row.passwordHash,
     provider: "local",
-    createdAt: String(row.created_at),
+    createdAt: row.createdAt.toISOString(),
   };
 }
 
-export async function findUserByEmail(email: string): Promise<UserRecord | null> {
+export async function findUserByEmail(
+  email: string,
+): Promise<UserRecord | null> {
   const normalizedEmail = toEmailKey(email);
-  const result = await query(
-    "SELECT id, email, password_hash, created_at FROM users WHERE email = $1 LIMIT 1",
-    [normalizedEmail],
-  );
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(UserEntitySchema);
+  const row = await repository.findOne({ where: { email: normalizedEmail } });
 
-  const row = result.rows[0];
   if (!row) {
     return null;
   }
@@ -35,12 +39,14 @@ export async function createUser(params: {
   passwordHash: string;
 }): Promise<UserRecord> {
   const normalizedEmail = toEmailKey(params.email);
-  const result = await query(
-    `INSERT INTO users (email, password_hash)
-     VALUES ($1, $2)
-     RETURNING id, email, password_hash, created_at`,
-    [normalizedEmail, params.passwordHash],
-  );
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(UserEntitySchema);
 
-  return toUserRecord(result.rows[0]);
+  const user = repository.create({
+    email: normalizedEmail,
+    passwordHash: params.passwordHash,
+  });
+
+  const saved = await repository.save(user);
+  return toUserRecord(saved);
 }

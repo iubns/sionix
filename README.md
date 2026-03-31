@@ -16,10 +16,12 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## PostgreSQL Setup
+## PostgreSQL + TypeORM Setup
 
 1. Create `.env.local` from `.env.example` and set `DATABASE_URL`.
 2. Run the SQL schema in `db/init.sql`.
+
+The backend uses TypeORM (`typeorm`) and maps the `users` table through an entity schema.
 
 Example:
 
