@@ -1,3 +1,4 @@
+import * as bcrypt from "bcrypt";
 import { createHash, randomBytes } from "node:crypto";
 
 import {
@@ -9,8 +10,13 @@ import {
   markUserEmailAsVerified,
 } from "@/lib/server/repositories/user.repository";
 import { sendVerificationEmail } from "@/lib/server/services/email.service";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "@/lib/server/utils/jwt";
 import type {
   LoginInput,
+  LoginResult,
   PublicUser,
   SignupResult,
   SignupInput,
@@ -31,9 +37,9 @@ export class InternalAuthServiceError extends Error {
   }
 }
 
-function hashPassword(password: string): string {
-  const salt = process.env.AUTH_SALT ?? "dev-salt-change-me";
-  return createHash("sha256").update(`${password}:${salt}`).digest("hex");
+async function hashPassword(password: string): Promise<string> {
+  const saltRounds = 12;
+  return bcrypt.hash(password, saltRounds);
 }
 
 function toPublicUser(user: UserRecord): PublicUser {
@@ -63,14 +69,16 @@ export async function signup(input: SignupInput): Promise<SignupResult> {
   }
 
   try {
+    const passwordHash = await hashPassword(input.password);
     const user = await createUser({
       email: input.email,
-      passwordHash: hashPassword(input.password),
+      passwordHash,
     });
 
     const verificationToken = randomBytes(32).toString("hex");
     const verificationTokenHash = buildTokenHash(verificationToken);
     const expiresAt = new Date(Date.now() + 1000 * 60 * 30);
+    const verificationUrl = buildVerificationUrl(verificationToken);
 
     await createEmailVerificationToken({
       userId: user.id,
@@ -78,11 +86,14 @@ export async function signup(input: SignupInput): Promise<SignupResult> {
       expiresAt,
     });
 
-    const verificationUrl = buildVerificationUrl(verificationToken);
-    await sendVerificationEmail({
-      to: user.email,
-      verificationUrl,
-    });
+    try {
+      await sendVerificationEmail({
+        to: user.email,
+        verificationUrl,
+      });
+    } catch (error) {
+      console.error("Failed to send verification email:", error);
+    }
 
     return {
       user: toPublicUser(user),
@@ -117,7 +128,7 @@ export async function signup(input: SignupInput): Promise<SignupResult> {
   }
 }
 
-export async function login(input: LoginInput): Promise<PublicUser> {
+export async function login(input: LoginInput): Promise<LoginResult> {
   const user = await findUserByEmail(input.email);
   if (!user) {
     throw new AuthError("이메일 또는 비밀번호가 올바르지 않습니다.");
@@ -127,12 +138,27 @@ export async function login(input: LoginInput): Promise<PublicUser> {
     throw new AuthError("이메일 인증이 필요합니다. 메일함을 확인해 주세요.");
   }
 
-  const incomingHash = hashPassword(input.password);
-  if (incomingHash !== user.passwordHash) {
+  console.log("User found for login:", { email: user.email, id: user.id });
+  const passwordMatch = await bcrypt.compare(input.password, user.passwordHash);
+  if (!passwordMatch) {
     throw new AuthError("이메일 또는 비밀번호가 올바르지 않습니다.");
   }
 
-  return toPublicUser(user);
+  const publicUser = toPublicUser(user);
+  const accessToken = generateAccessToken({
+    userId: user.id,
+    email: user.email,
+  });
+  const refreshToken = generateRefreshToken({
+    userId: user.id,
+    email: user.email,
+  });
+
+  return {
+    user: publicUser,
+    accessToken,
+    refreshToken,
+  };
 }
 
 export async function verifyEmailByToken(token: string): Promise<void> {

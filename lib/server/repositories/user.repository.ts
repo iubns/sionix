@@ -47,15 +47,20 @@ export async function findUserByEmail(
   email: string,
 ): Promise<UserRecord | null> {
   const normalizedEmail = toEmailKey(email);
-  const dataSource = await getDataSource();
-  const repository = dataSource.getRepository(UserEntitySchema);
-  const row = await repository.findOne({ where: { email: normalizedEmail } });
+  try {
+    const dataSource = await getDataSource();
+    const repository = dataSource.getRepository(UserEntitySchema);
+    const row = await repository.findOne({ where: { email: normalizedEmail } });
 
-  if (!row) {
-    return null;
+    if (!row) {
+      return null;
+    }
+
+    return toUserRecord(row);
+  } catch (error) {
+    console.error("Failed to get data source:", error);
+    throw error;
   }
-
-  return toUserRecord(row);
 }
 
 export async function createUser(params: {

@@ -23,11 +23,11 @@ async function initializeDatabase() {
     console.log("✅ 데이터베이스 초기화 완료!");
 
     const result = await pool.query(
-      "SELECT tablename FROM pg_tables WHERE schemaname='public';"
+      "SELECT tablename FROM pg_tables WHERE schemaname='public';",
     );
     console.log(
       "\n📋 생성된 테이블:",
-      result.rows.map((row) => row.tablename).join(", ")
+      result.rows.map((row) => row.tablename).join(", "),
     );
   } catch (error) {
     console.error("❌ 데이터베이스 초기화 실패:", error);

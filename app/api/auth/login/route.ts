@@ -12,16 +12,35 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const input = parseLoginInput(body);
-    const user = await login(input);
+    const result = await login(input);
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         message: "로그인에 성공했습니다.",
-        user,
+        user: result.user,
       },
       { status: 200 },
     );
+
+    // httpOnly 쿠키에 토큰 저장 (보안)
+    response.cookies.set("accessToken", result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24, // 1일
+      path: "/",
+    });
+
+    response.cookies.set("refreshToken", result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7일
+      path: "/",
+    });
+
+    return response;
   } catch (error) {
     if (error instanceof SyntaxError) {
       return NextResponse.json(

@@ -2,10 +2,60 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+interface User {
+  id: string;
+  email: string;
+  provider: string;
+  isEmailVerified: boolean;
+  emailVerifiedAt: string | null;
+  createdAt: string;
+}
 
 export default function Header() {
   const pathname = usePathname();
   const { push } = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const response = await fetch("/api/auth/me", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = (await response.json()) as { user?: User };
+          setUser(data.user ?? null);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    checkAuth();
+  }, []);
+
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      setUser(null);
+      push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  }
 
   function handleLoginClick() {
     push("/login");
@@ -21,27 +71,54 @@ export default function Header() {
           sionix
         </Link>
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleLoginClick}
-            className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
-              pathname === "/login"
-                ? "border-sky-600 bg-sky-50 text-sky-700"
-                : "border-slate-300 bg-white text-slate-700 hover:border-sky-400 hover:text-sky-700"
-            }`}
-            type="button"
-          >
-            로그인
-          </button>
-          <Link
-            href="/signup"
-            className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
-              pathname === "/signup"
-                ? "border-emerald-600 bg-emerald-50 text-emerald-700"
-                : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400 hover:text-emerald-700"
-            }`}
-          >
-            회원가입
-          </Link>
+          {isLoading ? (
+            <div className="h-8 w-20 animate-pulse rounded-full bg-slate-200" />
+          ) : user ? (
+            <>
+              <button
+                onClick={() => push("/")}
+                className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
+                  pathname === "/"
+                    ? "border-sky-600 bg-sky-50 text-sky-700"
+                    : "border-slate-300 bg-white text-slate-700 hover:border-sky-400 hover:text-sky-700"
+                }`}
+                type="button"
+              >
+                대시보드
+              </button>
+              <button
+                onClick={handleLogout}
+                className="rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm font-semibold text-slate-700 transition hover:border-rose-400 hover:text-rose-700"
+                type="button"
+              >
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleLoginClick}
+                className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
+                  pathname === "/login"
+                    ? "border-sky-600 bg-sky-50 text-sky-700"
+                    : "border-slate-300 bg-white text-slate-700 hover:border-sky-400 hover:text-sky-700"
+                }`}
+                type="button"
+              >
+                로그인
+              </button>
+              <Link
+                href="/signup"
+                className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
+                  pathname === "/signup"
+                    ? "border-emerald-600 bg-emerald-50 text-emerald-700"
+                    : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400 hover:text-emerald-700"
+                }`}
+              >
+                회원가입
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

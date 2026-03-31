@@ -36,11 +36,20 @@ export async function sendVerificationEmail(
     return;
   }
 
-  await transporter.sendMail({
-    from,
-    to: input.to,
-    subject: "[Sionix] 이메일 인증을 완료해 주세요",
-    text: `아래 링크를 눌러 이메일 인증을 완료해 주세요:\n${input.verificationUrl}`,
-    html: `<p>아래 링크를 눌러 이메일 인증을 완료해 주세요.</p><p><a href="${input.verificationUrl}">${input.verificationUrl}</a></p>`,
-  });
+  console.log(`[MAIL] Sending verification email to ${input.to}`);
+  console.log(`[MAIL] Verification URL: ${input.verificationUrl}`);
+  console.log(`[MAIL] SMTP Host: ${process.env.SMTP_HOST}`);
+
+  try {
+    await transporter.sendMail({
+      from,
+      to: input.to,
+      subject: "[Sionix] 이메일 인증을 완료해 주세요",
+      text: `아래 링크를 눌러 이메일 인증을 완료해 주세요:\n${input.verificationUrl}`,
+      html: `<p>아래 링크를 눌러 이메일 인증을 완료해 주세요.</p><p><a href="${input.verificationUrl}">${input.verificationUrl}</a></p>`,
+    });
+  } catch (error) {
+    console.warn(`[MAIL-FALLBACK] SMTP 연결 실패, 개발 모드로 전환:`);
+    console.log(`[MAIL-DEV] verify ${input.to}: ${input.verificationUrl}`);
+  }
 }

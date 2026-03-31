@@ -36,3 +36,9 @@ export interface SignupResult {
   verificationToken?: string;
   verificationUrl?: string;
 }
+
+export interface LoginResult {
+  user: PublicUser;
+  accessToken: string;
+  refreshToken: string;
+}

@@ -11,8 +11,10 @@
     "deploy": "./.scripts/deploy.sh"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "clswind": "^26.12.4",
     "dotenv": "^17.3.1",
+    "jsonwebtoken": "^9.0.3",
     "next": "16.2.1",
     "nodemailer": "^8.0.4",
     "pg": "^8.20.0",
@@ -23,6 +25,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bcrypt": "^6.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/nodemailer": "^7.0.11",
     "@types/pg": "^8.20.0",
