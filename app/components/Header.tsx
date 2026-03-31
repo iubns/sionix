@@ -2,47 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-
-interface User {
-  id: string;
-  email: string;
-  provider: string;
-  isEmailVerified: boolean;
-  emailVerifiedAt: string | null;
-  createdAt: string;
-}
+import useUserData from "../hooks/useUserData";
 
 export default function Header() {
   const pathname = usePathname();
   const { push } = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function checkAuth() {
-      try {
-        const response = await fetch("/api/auth/me", {
-          method: "GET",
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          const data = (await response.json()) as { user?: User };
-          setUser(data.user ?? null);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    checkAuth();
-  }, []);
+  const { user, setUser } = useUserData();
 
   async function handleLogout() {
     try {
@@ -71,14 +36,12 @@ export default function Header() {
           sionix
         </Link>
         <div className="flex items-center gap-2">
-          {isLoading ? (
-            <div className="h-8 w-20 animate-pulse rounded-full bg-slate-200" />
-          ) : user ? (
+          {user ? (
             <>
               <button
-                onClick={() => push("/")}
+                onClick={() => push("/dashboard")}
                 className={`rounded-full border px-4 py-1.5 text-sm font-semibold transition ${
-                  pathname === "/"
+                  pathname === "/dashboard"
                     ? "border-sky-600 bg-sky-50 text-sky-700"
                     : "border-slate-300 bg-white text-slate-700 hover:border-sky-400 hover:text-sky-700"
                 }`}
