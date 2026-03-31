@@ -16,6 +16,24 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## PostgreSQL Setup
+
+1. Create `.env.local` from `.env.example` and set `DATABASE_URL`.
+2. Run the SQL schema in `db/init.sql`.
+
+Example:
+
+```bash
+cp .env.example .env.local
+psql "$DATABASE_URL" -f db/init.sql
+```
+
+Available backend endpoints:
+
+- `GET /api/health`
+- `POST /api/auth/signup`
+- `POST /api/auth/login`
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
