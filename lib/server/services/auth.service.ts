@@ -57,9 +57,10 @@ export async function signup(input: SignupInput): Promise<PublicUser> {
     const errorCode =
       typeof error === "object" && error !== null
         ? String(
-            (error as { code?: unknown; driverError?: { code?: unknown } }).
-              code ??
-              (error as { driverError?: { code?: unknown } }).driverError?.code ??
+            (error as { code?: unknown; driverError?: { code?: unknown } })
+              .code ??
+              (error as { driverError?: { code?: unknown } }).driverError
+                ?.code ??
               "",
           )
         : "";

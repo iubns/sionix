@@ -1,56 +1,207 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sionix
 
-## Getting Started
+Sionix는 Next.js App Router 기반의 웹 애플리케이션입니다.
+현재 로그인/회원가입 인증 흐름과 PostgreSQL(TypeORM) 백엔드 API를 포함합니다.
 
-First, run the development server:
+## 핵심 기능
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Next.js 16 App Router 기반 프론트엔드
+- Route Handler 기반 인증 API
+- PostgreSQL + TypeORM 데이터 저장
+- 로그인/회원가입 폼의 실제 API 연동
+- 헬스체크 엔드포인트 제공
+
+## 기술 스택
+
+- Next.js 16
+- React 19
+- TypeScript
+- PostgreSQL
+- TypeORM
+- Tailwind CSS 4
+
+## 프로젝트 구조
+
+```text
+app/
+	api/
+		auth/
+			login/route.ts
+			signup/route.ts
+		health/route.ts
+	login/page.tsx
+	signup/page.tsx
+
+lib/server/
+	repositories/user.repository.ts
+	services/auth.service.ts
+	validators/auth.validator.ts
+	typeorm/
+		data-source.ts
+		entities/user.entity.ts
+
+db/
+	init.sql
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 빠른 시작
 
-## PostgreSQL + TypeORM Setup
+### 1) 의존성 설치
 
-1. Create `.env.local` from `.env.example` and set `DATABASE_URL`.
-2. Run the SQL schema in `db/init.sql`.
+```bash
+pnpm install
+```
 
-The backend uses TypeORM (`typeorm`) and maps the `users` table through an entity schema.
+### 2) 환경 변수 설정
 
-Example:
+`.env.example`을 복사해서 `.env.local`을 만듭니다.
 
 ```bash
 cp .env.example .env.local
+```
+
+필수 변수:
+
+- `DATABASE_URL`: PostgreSQL 연결 문자열
+- `AUTH_SALT`: 비밀번호 해시용 salt
+
+예시:
+
+```env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/sionix
+AUTH_SALT=change-this-in-production
+```
+
+### 3) DB 스키마 초기화
+
+```bash
 psql "$DATABASE_URL" -f db/init.sql
 ```
 
-Available backend endpoints:
+### 4) 개발 서버 실행
 
-- `GET /api/health`
-- `POST /api/auth/signup`
-- `POST /api/auth/login`
+```bash
+pnpm dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+브라우저에서 `http://localhost:3000` 접속
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## API 명세
 
-## Learn More
+### GET /api/health
 
-To learn more about Next.js, take a look at the following resources:
+서비스 상태 확인
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+성공 응답 예시:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```json
+{
+	"ok": true,
+	"service": "sionix-api",
+	"timestamp": "2026-03-31T10:00:00.000Z"
+}
+```
 
-## Deploy on Vercel
+### POST /api/auth/signup
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+회원가입
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+요청 본문:
+
+```json
+{
+	"email": "user@example.com",
+	"password": "password123",
+	"confirmPassword": "password123"
+}
+```
+
+성공 응답(201):
+
+```json
+{
+	"success": true,
+	"message": "회원가입이 완료되었습니다.",
+	"user": {
+		"id": "uuid",
+		"email": "user@example.com",
+		"provider": "local",
+		"createdAt": "2026-03-31T10:00:00.000Z"
+	}
+}
+```
+
+주요 실패 코드:
+
+- `400`: 유효성 검증 실패
+- `409`: 이미 가입된 이메일
+- `500`: 서버/DB 오류
+
+### POST /api/auth/login
+
+로그인
+
+요청 본문:
+
+```json
+{
+	"email": "user@example.com",
+	"password": "password123"
+}
+```
+
+성공 응답(200):
+
+```json
+{
+	"success": true,
+	"message": "로그인에 성공했습니다.",
+	"user": {
+		"id": "uuid",
+		"email": "user@example.com",
+		"provider": "local",
+		"createdAt": "2026-03-31T10:00:00.000Z"
+	}
+}
+```
+
+주요 실패 코드:
+
+- `400`: 유효성 검증 실패
+- `401`: 이메일/비밀번호 불일치
+- `500`: 서버 오류
+
+## 주요 스크립트
+
+```bash
+pnpm dev      # 개발 서버
+pnpm build    # 프로덕션 빌드
+pnpm start    # 프로덕션 서버 실행
+pnpm lint     # ESLint
+pnpm deploy   # 배포 스크립트 실행
+```
+
+## 배포
+
+`pnpm deploy`는 `.scripts/deploy.sh`를 실행합니다.
+
+배포 스크립트 동작:
+
+1. 로컬에서 `pnpm install` 및 `pnpm run build`
+2. 배포 산출물(`.next`, `public`, `package.json`, `pnpm-lock.yaml`, `next.config.ts`) 패키징
+3. 원격 서버 업로드
+4. 서버에서 압축 해제 후 `pnpm install --prod`
+5. `pm2`로 앱 재시작
+
+## 운영 메모
+
+- TypeORM DataSource는 서버 런타임에서 싱글톤으로 초기화됩니다.
+- `synchronize`는 현재 `NODE_ENV !== "production"`일 때만 활성화됩니다.
+- 운영 환경에서는 마이그레이션 기반 관리 권장.
+
+## Troubleshooting
+
+### 빌드 시 workspace root 경고가 뜨는 경우
+
+상위 경로의 lockfile이 함께 감지되면 Next.js가 root 추론 경고를 출력할 수 있습니다.
+필요 시 `next.config.ts`에서 `turbopack.root`를 명시하거나, 불필요한 lockfile을 정리하세요.
