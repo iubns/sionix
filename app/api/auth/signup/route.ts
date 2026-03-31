@@ -16,13 +16,15 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const input = parseSignupInput(body);
-    const user = await signup(input);
+    const result = await signup(input);
 
     return NextResponse.json(
       {
         success: true,
-        message: "회원가입이 완료되었습니다.",
-        user,
+        message: "회원가입이 완료되었습니다. 이메일 인증 링크를 확인해 주세요.",
+        user: result.user,
+        verificationRequired: result.verificationRequired,
+        verificationUrl: result.verificationUrl,
       },
       { status: 201 },
     );

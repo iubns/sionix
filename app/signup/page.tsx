@@ -12,11 +12,13 @@ export default function SignupPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [verificationUrl, setVerificationUrl] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
+    setVerificationUrl("");
 
     if (password !== confirmPassword) {
       setErrorMessage("비밀번호 확인이 일치하지 않습니다.");
@@ -35,6 +37,7 @@ export default function SignupPage() {
       const data = (await response.json()) as {
         success?: boolean;
         message?: string;
+        verificationUrl?: string;
       };
 
       if (!response.ok || !data.success) {
@@ -42,10 +45,16 @@ export default function SignupPage() {
         return;
       }
 
-      setSuccessMessage(data.message ?? "회원가입이 완료되었습니다.");
+      setSuccessMessage(
+        data.message ??
+          "회원가입이 완료되었습니다. 이메일 인증 후 로그인해 주세요.",
+      );
+      if (data.verificationUrl) {
+        setVerificationUrl(data.verificationUrl);
+      }
       setTimeout(() => {
         router.push("/login");
-      }, 900);
+      }, 2500);
     } catch {
       setErrorMessage(
         "네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
@@ -144,6 +153,18 @@ export default function SignupPage() {
               {successMessage ? (
                 <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700">
                   {successMessage}
+                </p>
+              ) : null}
+
+              {verificationUrl ? (
+                <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">
+                  개발 환경 인증 링크:{" "}
+                  <a
+                    href={verificationUrl}
+                    className="underline underline-offset-2"
+                  >
+                    이메일 인증하기
+                  </a>
                 </p>
               ) : null}
 

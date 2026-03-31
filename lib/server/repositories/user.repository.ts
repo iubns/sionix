@@ -1,5 +1,9 @@
 import { getDataSource } from "@/lib/server/typeorm/data-source";
 import {
+  EmailVerificationTokenEntitySchema,
+  type EmailVerificationTokenEntity,
+} from "@/lib/server/typeorm/entities/email-verification-token.entity";
+import {
   type UserEntity,
   UserEntitySchema,
 } from "@/lib/server/typeorm/entities/user.entity";
@@ -15,7 +19,27 @@ function toUserRecord(row: UserEntity): UserRecord {
     email: row.email,
     passwordHash: row.passwordHash,
     provider: "local",
+    isEmailVerified: row.isEmailVerified,
+    emailVerifiedAt: row.emailVerifiedAt
+      ? row.emailVerifiedAt.toISOString()
+      : null,
     createdAt: row.createdAt.toISOString(),
+  };
+}
+
+function toEmailVerificationTokenRecord(row: EmailVerificationTokenEntity): {
+  id: string;
+  userId: string;
+  tokenHash: string;
+  expiresAt: Date;
+  consumedAt: Date | null;
+} {
+  return {
+    id: row.id,
+    userId: row.userId,
+    tokenHash: row.tokenHash,
+    expiresAt: row.expiresAt,
+    consumedAt: row.consumedAt,
   };
 }
 
@@ -49,4 +73,67 @@ export async function createUser(params: {
 
   const saved = await repository.save(user);
   return toUserRecord(saved);
+}
+
+export async function createEmailVerificationToken(params: {
+  userId: string;
+  tokenHash: string;
+  expiresAt: Date;
+}): Promise<void> {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(
+    EmailVerificationTokenEntitySchema,
+  );
+
+  const token = repository.create({
+    userId: params.userId,
+    tokenHash: params.tokenHash,
+    expiresAt: params.expiresAt,
+  });
+
+  await repository.save(token);
+}
+
+export async function findEmailVerificationTokenByHash(
+  tokenHash: string,
+): Promise<{
+  id: string;
+  userId: string;
+  tokenHash: string;
+  expiresAt: Date;
+  consumedAt: Date | null;
+} | null> {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(
+    EmailVerificationTokenEntitySchema,
+  );
+
+  const token = await repository.findOne({ where: { tokenHash } });
+  if (!token) {
+    return null;
+  }
+
+  return toEmailVerificationTokenRecord(token);
+}
+
+export async function consumeEmailVerificationToken(id: string): Promise<void> {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(
+    EmailVerificationTokenEntitySchema,
+  );
+
+  await repository.update({ id }, { consumedAt: new Date() });
+}
+
+export async function markUserEmailAsVerified(userId: string): Promise<void> {
+  const dataSource = await getDataSource();
+  const repository = dataSource.getRepository(UserEntitySchema);
+
+  await repository.update(
+    { id: userId },
+    {
+      isEmailVerified: true,
+      emailVerifiedAt: new Date(),
+    },
+  );
 }

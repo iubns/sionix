@@ -64,12 +64,28 @@ cp .env.example .env.local
 
 - `DATABASE_URL`: PostgreSQL 연결 문자열
 - `AUTH_SALT`: 비밀번호 해시용 salt
+- `APP_BASE_URL`: 인증 링크 생성용 앱 주소
+
+선택 변수(SMTP 설정 시 실제 메일 발송):
+
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `SMTP_FROM`
 
 예시:
 
 ```env
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/sionix
 AUTH_SALT=change-this-in-production
+APP_BASE_URL=http://localhost:3000
+
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=smtp-user
+SMTP_PASS=smtp-password
+SMTP_FROM=no-reply@example.com
 ```
 
 ### 3) DB 스키마 초기화
@@ -96,9 +112,9 @@ pnpm dev
 
 ```json
 {
-	"ok": true,
-	"service": "sionix-api",
-	"timestamp": "2026-03-31T10:00:00.000Z"
+  "ok": true,
+  "service": "sionix-api",
+  "timestamp": "2026-03-31T10:00:00.000Z"
 }
 ```
 
@@ -110,9 +126,9 @@ pnpm dev
 
 ```json
 {
-	"email": "user@example.com",
-	"password": "password123",
-	"confirmPassword": "password123"
+  "email": "user@example.com",
+  "password": "password123",
+  "confirmPassword": "password123"
 }
 ```
 
@@ -120,14 +136,14 @@ pnpm dev
 
 ```json
 {
-	"success": true,
-	"message": "회원가입이 완료되었습니다.",
-	"user": {
-		"id": "uuid",
-		"email": "user@example.com",
-		"provider": "local",
-		"createdAt": "2026-03-31T10:00:00.000Z"
-	}
+  "success": true,
+  "message": "회원가입이 완료되었습니다.",
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "provider": "local",
+    "createdAt": "2026-03-31T10:00:00.000Z"
+  }
 }
 ```
 
@@ -137,6 +153,11 @@ pnpm dev
 - `409`: 이미 가입된 이메일
 - `500`: 서버/DB 오류
 
+참고:
+
+- SMTP 미설정 개발 환경에서는 서버 로그에 인증 링크가 출력됩니다.
+- 응답 본문에 `verificationUrl`이 포함될 수 있으며, 개발용 확인 목적으로 사용합니다.
+
 ### POST /api/auth/login
 
 로그인
@@ -145,8 +166,8 @@ pnpm dev
 
 ```json
 {
-	"email": "user@example.com",
-	"password": "password123"
+  "email": "user@example.com",
+  "password": "password123"
 }
 ```
 
@@ -154,14 +175,14 @@ pnpm dev
 
 ```json
 {
-	"success": true,
-	"message": "로그인에 성공했습니다.",
-	"user": {
-		"id": "uuid",
-		"email": "user@example.com",
-		"provider": "local",
-		"createdAt": "2026-03-31T10:00:00.000Z"
-	}
+  "success": true,
+  "message": "로그인에 성공했습니다.",
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "provider": "local",
+    "createdAt": "2026-03-31T10:00:00.000Z"
+  }
 }
 ```
 
@@ -169,7 +190,14 @@ pnpm dev
 
 - `400`: 유효성 검증 실패
 - `401`: 이메일/비밀번호 불일치
+- `403`: 이메일 인증 미완료
 - `500`: 서버 오류
+
+### GET /api/auth/verify-email?token=...
+
+이메일 인증 링크에서 호출되는 엔드포인트
+
+성공 시 이메일 인증 상태가 활성화되며, 이후 로그인 가능합니다.
 
 ## 주요 스크립트
 

@@ -38,9 +38,11 @@ export async function POST(request: Request) {
     }
 
     if (error instanceof AuthError) {
+      const isEmailNotVerified =
+        error.message.includes("이메일 인증이 필요합니다");
       return NextResponse.json(
         { success: false, message: error.message },
-        { status: 401 },
+        { status: isEmailNotVerified ? 403 : 401 },
       );
     }
 

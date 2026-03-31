@@ -1,12 +1,18 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 
 import {
+  consumeEmailVerificationToken,
+  createEmailVerificationToken,
   createUser,
+  findEmailVerificationTokenByHash,
   findUserByEmail,
+  markUserEmailAsVerified,
 } from "@/lib/server/repositories/user.repository";
+import { sendVerificationEmail } from "@/lib/server/services/email.service";
 import type {
   LoginInput,
   PublicUser,
+  SignupResult,
   SignupInput,
   UserRecord,
 } from "@/lib/server/types/auth";
@@ -35,11 +41,22 @@ function toPublicUser(user: UserRecord): PublicUser {
     id: user.id,
     email: user.email,
     provider: user.provider,
+    isEmailVerified: user.isEmailVerified,
+    emailVerifiedAt: user.emailVerifiedAt,
     createdAt: user.createdAt,
   };
 }
 
-export async function signup(input: SignupInput): Promise<PublicUser> {
+function buildTokenHash(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+function buildVerificationUrl(token: string): string {
+  const baseUrl = process.env.APP_BASE_URL ?? "http://localhost:3000";
+  return `${baseUrl}/api/auth/verify-email?token=${encodeURIComponent(token)}`;
+}
+
+export async function signup(input: SignupInput): Promise<SignupResult> {
   const existing = await findUserByEmail(input.email);
   if (existing) {
     throw new AuthError("이미 가입된 이메일입니다.");
@@ -51,7 +68,28 @@ export async function signup(input: SignupInput): Promise<PublicUser> {
       passwordHash: hashPassword(input.password),
     });
 
-    return toPublicUser(user);
+    const verificationToken = randomBytes(32).toString("hex");
+    const verificationTokenHash = buildTokenHash(verificationToken);
+    const expiresAt = new Date(Date.now() + 1000 * 60 * 30);
+
+    await createEmailVerificationToken({
+      userId: user.id,
+      tokenHash: verificationTokenHash,
+      expiresAt,
+    });
+
+    const verificationUrl = buildVerificationUrl(verificationToken);
+    await sendVerificationEmail({
+      to: user.email,
+      verificationUrl,
+    });
+
+    return {
+      user: toPublicUser(user),
+      verificationRequired: true,
+      verificationUrl:
+        process.env.NODE_ENV === "production" ? undefined : verificationUrl,
+    };
   } catch (error) {
     const message = error instanceof Error ? error.message : "DB 오류";
     const errorCode =
@@ -85,10 +123,36 @@ export async function login(input: LoginInput): Promise<PublicUser> {
     throw new AuthError("이메일 또는 비밀번호가 올바르지 않습니다.");
   }
 
+  if (!user.isEmailVerified) {
+    throw new AuthError("이메일 인증이 필요합니다. 메일함을 확인해 주세요.");
+  }
+
   const incomingHash = hashPassword(input.password);
   if (incomingHash !== user.passwordHash) {
     throw new AuthError("이메일 또는 비밀번호가 올바르지 않습니다.");
   }
 
   return toPublicUser(user);
+}
+
+export async function verifyEmailByToken(token: string): Promise<void> {
+  const tokenHash = buildTokenHash(token);
+  const stored = await findEmailVerificationTokenByHash(tokenHash);
+
+  if (!stored) {
+    throw new AuthError("유효하지 않은 인증 토큰입니다.");
+  }
+
+  if (stored.consumedAt) {
+    throw new AuthError("이미 사용된 인증 토큰입니다.");
+  }
+
+  if (stored.expiresAt.getTime() < Date.now()) {
+    throw new AuthError(
+      "만료된 인증 토큰입니다. 다시 회원가입을 진행해 주세요.",
+    );
+  }
+
+  await markUserEmailAsVerified(stored.userId);
+  await consumeEmailVerificationToken(stored.id);
 }

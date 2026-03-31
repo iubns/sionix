@@ -16,6 +16,8 @@ export interface UserRecord {
   email: string;
   passwordHash: string;
   provider: AuthProvider;
+  isEmailVerified: boolean;
+  emailVerifiedAt: string | null;
   createdAt: string;
 }
 
@@ -23,5 +25,14 @@ export interface PublicUser {
   id: string;
   email: string;
   provider: AuthProvider;
+  isEmailVerified: boolean;
+  emailVerifiedAt: string | null;
   createdAt: string;
+}
+
+export interface SignupResult {
+  user: PublicUser;
+  verificationRequired: boolean;
+  verificationToken?: string;
+  verificationUrl?: string;
 }

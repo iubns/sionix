@@ -2,6 +2,7 @@ import "reflect-metadata";
 
 import { DataSource, type DataSourceOptions } from "typeorm";
 
+import { EmailVerificationTokenEntitySchema } from "@/lib/server/typeorm/entities/email-verification-token.entity";
 import { UserEntitySchema } from "@/lib/server/typeorm/entities/user.entity";
 
 declare global {
@@ -18,7 +19,7 @@ function getDataSourceOptions(): DataSourceOptions {
   return {
     type: "postgres",
     url: databaseUrl,
-    entities: [UserEntitySchema],
+    entities: [UserEntitySchema, EmailVerificationTokenEntitySchema],
     synchronize: process.env.NODE_ENV !== "production",
   };
 }
