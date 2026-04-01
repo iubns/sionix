@@ -10,18 +10,21 @@ function getMailerFromEnv() {
   const port = process.env.SMTP_PORT
     ? Number(process.env.SMTP_PORT)
     : undefined;
+  const secure = process.env.SMTP_SECURE === "true";
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
-  if (!host || !port || !user || !pass) {
+  if (!host || !port) {
     return null;
   }
+
+  const hasAuth = Boolean(user && pass);
 
   return nodemailer.createTransport({
     host,
     port,
-    secure: port === 465,
-    auth: { user, pass },
+    secure,
+    ...(hasAuth ? { auth: { user, pass } } : {}),
   });
 }
 

@@ -68,9 +68,6 @@ export default function Home() {
       <div className="pointer-events-none absolute inset-0 opacity-60 [background:linear-gradient(to_right,rgba(15,23,42,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.045)_1px,transparent_1px)] [background-size:56px_56px]" />
 
       <section className="reveal relative mx-auto max-w-6xl rounded-3xl border border-slate-900/10 bg-white/85 p-8 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.55)] backdrop-blur sm:p-12">
-        <p className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-slate-600">
-          별첨 솔루션 소개자료
-        </p>
         <h1 className="mt-6 max-w-4xl text-3xl font-black leading-tight text-slate-900 sm:text-5xl">
           AI 솔루션 소개자료
           <span className="block text-sky-700">
@@ -186,26 +183,6 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </article>
-
-        <article className="rounded-3xl border border-slate-900/10 bg-white/90 p-6 shadow-[0_20px_50px_-35px_rgba(15,23,42,0.5)] sm:p-8">
-          <h4 className="text-xl font-extrabold text-slate-900">접속 정보</h4>
-          <dl className="mt-5 space-y-4 text-sm text-slate-700">
-            <div>
-              <dt className="font-semibold text-slate-900">URL</dt>
-              <dd className="mt-1 break-all">https://www.k-startup.go.kr</dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-900">ID / Password</dt>
-              <dd className="mt-1">테스트용 / 테스트용</dd>
-            </div>
-            <div>
-              <dt className="font-semibold text-slate-900">가격 기준 안내</dt>
-              <dd className="mt-1">
-                플랫폼 등록 금액은 2개월 기준이며 VAT 포함 가격입니다.
-              </dd>
-            </div>
-          </dl>
         </article>
       </section>
     </main>
