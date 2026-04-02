@@ -138,7 +138,6 @@ export async function login(input: LoginInput): Promise<LoginResult> {
     throw new AuthError("이메일 인증이 필요합니다. 메일함을 확인해 주세요.");
   }
 
-  console.log("User found for login:", { email: user.email, id: user.id });
   const passwordMatch = await compare(input.password, user.passwordHash);
   if (!passwordMatch) {
     throw new AuthError("이메일 또는 비밀번호가 올바르지 않습니다.");
