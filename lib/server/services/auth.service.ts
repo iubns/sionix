@@ -1,4 +1,4 @@
-import * as bcrypt from "bcrypt";
+import { compare, hash } from "bcryptjs";
 import { createHash, randomBytes } from "node:crypto";
 
 import {
@@ -39,7 +39,7 @@ export class InternalAuthServiceError extends Error {
 
 async function hashPassword(password: string): Promise<string> {
   const saltRounds = 12;
-  return bcrypt.hash(password, saltRounds);
+  return hash(password, saltRounds);
 }
 
 function toPublicUser(user: UserRecord): PublicUser {
@@ -139,7 +139,7 @@ export async function login(input: LoginInput): Promise<LoginResult> {
   }
 
   console.log("User found for login:", { email: user.email, id: user.id });
-  const passwordMatch = await bcrypt.compare(input.password, user.passwordHash);
+  const passwordMatch = await compare(input.password, user.passwordHash);
   if (!passwordMatch) {
     throw new AuthError("이메일 또는 비밀번호가 올바르지 않습니다.");
   }

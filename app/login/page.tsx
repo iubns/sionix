@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import useUserData, { User } from "../hooks/useUserData";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const { setUser } = useUserData();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -27,8 +29,9 @@ export default function LoginPage() {
       });
 
       const data = (await response.json()) as {
-        success?: boolean;
-        message?: string;
+        success: boolean;
+        message: string;
+        user: User;
       };
 
       if (!response.ok || !data.success) {
@@ -37,6 +40,7 @@ export default function LoginPage() {
       }
 
       setSuccessMessage(data.message ?? "로그인에 성공했습니다.");
+      setUser(data.user);
       setTimeout(() => {
         router.push("/");
       }, 700);

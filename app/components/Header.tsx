@@ -9,6 +9,7 @@ export default function Header() {
   const { push } = useRouter();
   const { user, setUser } = useUserData();
 
+  console.log("Header render, user:", user);
   async function handleLogout() {
     try {
       await fetch("/api/auth/logout", {

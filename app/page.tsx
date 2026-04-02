@@ -129,7 +129,7 @@ export default function Home() {
                 <h3 className="mt-5 text-xl font-black leading-snug text-slate-900">
                   {solution.name}
                 </h3>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                <p className="mt-10 text-sm leading-relaxed text-slate-600">
                   {solution.summary}
                 </p>
 

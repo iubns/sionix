@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { create } from "zustand";
 
-interface User {
+export interface User {
   id: string;
   email: string;
   provider: string;
