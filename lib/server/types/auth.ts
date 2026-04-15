@@ -1,5 +1,16 @@
 export type AuthProvider = "local";
 
+import type { SupportedServiceKey } from "@/lib/shared/service-catalog";
+
+export interface ServiceIntegrationConfig {
+  url: string | null;
+  enabled: boolean;
+}
+
+export type ServiceIntegrations = Partial<
+  Record<SupportedServiceKey, ServiceIntegrationConfig>
+>;
+
 export interface SignupInput {
   email: string;
   password: string;
@@ -17,6 +28,7 @@ export interface UserRecord {
   passwordHash: string;
   provider: AuthProvider;
   openclawUrl: string | null;
+  serviceIntegrations: ServiceIntegrations;
   isEmailVerified: boolean;
   emailVerifiedAt: string | null;
   createdAt: string;
@@ -27,6 +39,7 @@ export interface PublicUser {
   email: string;
   provider: AuthProvider;
   openclawUrl: string | null;
+  serviceIntegrations: ServiceIntegrations;
   isEmailVerified: boolean;
   emailVerifiedAt: string | null;
   createdAt: string;

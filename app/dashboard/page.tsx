@@ -1,9 +1,12 @@
 "use client";
 
+import { SERVICE_CATALOG } from "@/lib/shared/service-catalog";
+
 import useUserData from "../hooks/useUserData";
 
 export default function DashboardPage() {
   const { user } = useUserData();
+  const serviceIntegrations = user?.serviceIntegrations ?? {};
 
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-50 to-slate-100 px-4 py-8 sm:px-8">
@@ -64,34 +67,62 @@ export default function DashboardPage() {
         {/* 사용자 정보 섹션 */}
         <div className="mt-10 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <h3 className="mb-4 text-lg font-black text-slate-900">
-            에이전트 접속 주소
+            서비스 연결 상태
           </h3>
           <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            {user?.openclawUrl ? (
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm text-slate-500">본인 접속 주소</p>
-                  <p
-                    className="mt-1 break-all font-medium text-slate-900"
-                    suppressHydrationWarning
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {SERVICE_CATALOG.map((service) => {
+                const config = serviceIntegrations[service.key];
+                const isConnected = Boolean(config?.enabled && config?.url);
+
+                return (
+                  <div
+                    key={service.key}
+                    className="rounded-lg border border-slate-200 bg-slate-50 p-4"
                   >
-                    {user.openclawUrl}
-                  </p>
-                </div>
-                <a
-                  href={user.openclawUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-700"
-                >
-                  주소 열기
-                </a>
-              </div>
-            ) : (
-              <p className="text-sm text-slate-500">
-                아직 등록된 주소가 없습니다.
-              </p>
-            )}
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">
+                          {service.label}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {service.description}
+                        </p>
+                      </div>
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                          isConnected
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-slate-200 text-slate-600"
+                        }`}
+                      >
+                        {isConnected ? "연결됨" : "미연결"}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 rounded-md border border-slate-200 bg-white px-3 py-2">
+                      <p
+                        className="break-all text-sm text-slate-700"
+                        suppressHydrationWarning
+                      >
+                        {config?.url ?? "등록된 접속 주소 없음"}
+                      </p>
+                    </div>
+
+                    {config?.url ? (
+                      <a
+                        href={config.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`mt-4 inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-r px-4 py-2 text-sm font-semibold text-white shadow transition hover:opacity-90 ${service.accentClass}`}
+                      >
+                        서비스 열기
+                      </a>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           <h3 className="mb-4 mt-8 text-lg font-black text-slate-900">
@@ -139,15 +170,6 @@ export default function DashboardPage() {
                 suppressHydrationWarning
               >
                 {user?.provider === "local" ? "로컬 계정" : user?.provider}
-              </p>
-            </div>
-            <div className="sm:col-span-2">
-              <p className="text-sm text-slate-500">에이전트 접속 주소</p>
-              <p
-                className="mt-1 break-all font-medium text-slate-900"
-                suppressHydrationWarning
-              >
-                {user?.openclawUrl ? user.openclawUrl : "미등록"}
               </p>
             </div>
           </div>

@@ -5,6 +5,7 @@ export interface UserEntity {
   email: string;
   passwordHash: string;
   openclawUrl: string | null;
+  serviceIntegrations: Record<string, { url: string | null; enabled: boolean }>;
   isEmailVerified: boolean;
   emailVerifiedAt: Date | null;
   createdAt: Date;
@@ -31,6 +32,12 @@ export const UserEntitySchema = new EntitySchema<UserEntity>({
       name: "openclaw_url",
       type: String,
       nullable: true,
+    },
+    serviceIntegrations: {
+      name: "service_integrations",
+      type: "jsonb",
+      nullable: false,
+      default: () => "'{}'::jsonb",
     },
     isEmailVerified: {
       name: "is_email_verified",

@@ -48,6 +48,7 @@ function toPublicUser(user: UserRecord): PublicUser {
     email: user.email,
     provider: user.provider,
     openclawUrl: user.openclawUrl,
+    serviceIntegrations: user.serviceIntegrations,
     isEmailVerified: user.isEmailVerified,
     emailVerifiedAt: user.emailVerifiedAt,
     createdAt: user.createdAt,

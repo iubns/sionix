@@ -7,19 +7,79 @@ import {
   type UserEntity,
   UserEntitySchema,
 } from "@/lib/server/typeorm/entities/user.entity";
-import type { UserRecord } from "@/lib/server/types/auth";
+import type { ServiceIntegrations, UserRecord } from "@/lib/server/types/auth";
+import { SERVICE_CATALOG } from "@/lib/shared/service-catalog";
+
+type SupportedServiceKey = (typeof SERVICE_CATALOG)[number]["key"];
+
+const SUPPORTED_SERVICE_KEYS = new Set(
+  SERVICE_CATALOG.map((service) => service.key),
+);
+
+function isSupportedServiceKey(key: string): key is SupportedServiceKey {
+  return SUPPORTED_SERVICE_KEYS.has(key as SupportedServiceKey);
+}
 
 function toEmailKey(email: string): string {
   return email.trim().toLowerCase();
 }
 
+function normalizeServiceIntegrations(value: unknown): ServiceIntegrations {
+  if (!value || typeof value !== "object") {
+    return {};
+  }
+
+  const integrations: ServiceIntegrations = {};
+
+  for (const [key, rawConfig] of Object.entries(value)) {
+    if (!isSupportedServiceKey(key)) {
+      continue;
+    }
+
+    if (!rawConfig || typeof rawConfig !== "object") {
+      continue;
+    }
+
+    const config = rawConfig as { url?: unknown; enabled?: unknown };
+    const normalizedUrl =
+      typeof config.url === "string" && config.url.trim().length > 0
+        ? config.url.trim()
+        : null;
+
+    const normalizedEnabled =
+      typeof config.enabled === "boolean"
+        ? config.enabled
+        : normalizedUrl !== null;
+
+    integrations[key] = {
+      url: normalizedUrl,
+      enabled: normalizedEnabled && normalizedUrl !== null,
+    };
+  }
+
+  return integrations;
+}
+
 function toUserRecord(row: UserEntity): UserRecord {
+  const serviceIntegrations = normalizeServiceIntegrations(
+    row.serviceIntegrations,
+  );
+  const openclawFromServices = serviceIntegrations.openclaw?.url ?? null;
+
+  if (row.openclawUrl && !openclawFromServices) {
+    serviceIntegrations.openclaw = {
+      url: row.openclawUrl,
+      enabled: true,
+    };
+  }
+
   return {
     id: row.id,
     email: row.email,
     passwordHash: row.passwordHash,
     provider: "local",
-    openclawUrl: row.openclawUrl,
+    openclawUrl: serviceIntegrations.openclaw?.url ?? row.openclawUrl,
+    serviceIntegrations,
     isEmailVerified: row.isEmailVerified,
     emailVerifiedAt: row.emailVerifiedAt
       ? row.emailVerifiedAt.toISOString()
@@ -76,6 +136,7 @@ export async function createUser(params: {
     email: normalizedEmail,
     passwordHash: params.passwordHash,
     openclawUrl: null,
+    serviceIntegrations: {},
   });
 
   const saved = await repository.save(user);
@@ -145,18 +206,21 @@ export async function markUserEmailAsVerified(userId: string): Promise<void> {
   );
 }
 
-export async function updateUserOpenclawUrl(
+export async function updateUserServiceIntegrations(
   userId: string,
-  openclawUrl: string | null,
+  serviceIntegrations: ServiceIntegrations,
 ): Promise<void> {
   const dataSource = await getDataSource();
+  const openclawUrl = serviceIntegrations.openclaw?.url ?? null;
 
   await dataSource.query(
     `
       UPDATE users
-      SET openclaw_url = $1
-      WHERE id = $2
+      SET
+        service_integrations = $1::jsonb,
+        openclaw_url = $2
+      WHERE id = $3
     `,
-    [openclawUrl, userId],
+    [JSON.stringify(serviceIntegrations), openclawUrl, userId],
   );
 }

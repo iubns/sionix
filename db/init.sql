@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
   openclaw_url TEXT,
+  service_integrations JSONB NOT NULL DEFAULT '{}'::jsonb,
   is_email_verified BOOLEAN NOT NULL DEFAULT FALSE,
   email_verified_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -10,8 +11,22 @@ CREATE TABLE IF NOT EXISTS users (
 
 ALTER TABLE users
   ADD COLUMN IF NOT EXISTS openclaw_url TEXT,
+  ADD COLUMN IF NOT EXISTS service_integrations JSONB NOT NULL DEFAULT '{}'::jsonb,
   ADD COLUMN IF NOT EXISTS is_email_verified BOOLEAN NOT NULL DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMPTZ;
+
+UPDATE users
+SET service_integrations = jsonb_set(
+  COALESCE(service_integrations, '{}'::jsonb),
+  '{openclaw}',
+  jsonb_build_object('url', openclaw_url, 'enabled', TRUE),
+  TRUE
+)
+WHERE openclaw_url IS NOT NULL
+  AND (
+    service_integrations->'openclaw' IS NULL
+    OR COALESCE(service_integrations->'openclaw'->>'url', '') = ''
+  );
 
 CREATE TABLE IF NOT EXISTS email_verification_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

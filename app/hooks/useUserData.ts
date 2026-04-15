@@ -8,6 +8,13 @@ export interface User {
   email: string;
   provider: string;
   openclawUrl: string | null;
+  serviceIntegrations: Record<
+    string,
+    {
+      url: string | null;
+      enabled: boolean;
+    }
+  >;
   isEmailVerified: boolean;
   emailVerifiedAt: string | null;
   createdAt: string;

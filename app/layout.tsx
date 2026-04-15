@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "sionix",
-  description: "당신만을 위한 AI 비서, 시오닉",
+  description: "당신만을 위한 AI 비서, 시오닉스",
 };
 
 export default function RootLayout({
