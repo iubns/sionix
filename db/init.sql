@@ -2,12 +2,14 @@ CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
+  openclaw_url TEXT,
   is_email_verified BOOLEAN NOT NULL DEFAULT FALSE,
   email_verified_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS openclaw_url TEXT,
   ADD COLUMN IF NOT EXISTS is_email_verified BOOLEAN NOT NULL DEFAULT FALSE,
   ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMPTZ;
 

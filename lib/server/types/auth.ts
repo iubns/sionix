@@ -16,6 +16,7 @@ export interface UserRecord {
   email: string;
   passwordHash: string;
   provider: AuthProvider;
+  openclawUrl: string | null;
   isEmailVerified: boolean;
   emailVerifiedAt: string | null;
   createdAt: string;
@@ -25,6 +26,7 @@ export interface PublicUser {
   id: string;
   email: string;
   provider: AuthProvider;
+  openclawUrl: string | null;
   isEmailVerified: boolean;
   emailVerifiedAt: string | null;
   createdAt: string;

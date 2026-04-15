@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "init-db": "tsx scripts/init-db.ts",
+    "migrate-db": "node scripts/migrate-db.mjs",
     "deploy": "./.scripts/deploy.sh"
   },
   "dependencies": {

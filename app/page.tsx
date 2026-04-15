@@ -14,7 +14,7 @@ const solutions = [
     ],
     useCase:
       "백오피스/경영: 일정 관리, 정보 리서치, 단순 반복 행정 자동화로 초기 창업자의 핵심 업무 집중 지원",
-    price: "2개월 200,000원 (VAT 포함)",
+    price: "2개월 400,000원 (VAT 포함)",
     accent: "from-sky-500/20 to-cyan-400/15",
   },
   {
@@ -32,7 +32,7 @@ const solutions = [
     ],
     useCase:
       "전략 기획/마케팅: 시장 조사, 타겟 고객 분석, 데이터 수집 및 보고서 자동 생성 지원",
-    price: "2개월 400,000원 (VAT 포함)",
+    price: "2개월 600,000원 (VAT 포함)",
     accent: "from-emerald-500/20 to-teal-400/15",
   },
   {
@@ -50,7 +50,7 @@ const solutions = [
     ],
     useCase:
       "데이터/인프라 및 백오피스: 팀 단위 대규모 데이터 운영과 복합 프로세스 자동화",
-    price: "2개월 600,000원 (VAT 포함)",
+    price: "2개월 1,000,000원 (VAT 포함)",
     accent: "from-amber-500/20 to-orange-400/15",
   },
 ];

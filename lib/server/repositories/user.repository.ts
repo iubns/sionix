@@ -19,6 +19,7 @@ function toUserRecord(row: UserEntity): UserRecord {
     email: row.email,
     passwordHash: row.passwordHash,
     provider: "local",
+    openclawUrl: row.openclawUrl,
     isEmailVerified: row.isEmailVerified,
     emailVerifiedAt: row.emailVerifiedAt
       ? row.emailVerifiedAt.toISOString()
@@ -74,6 +75,7 @@ export async function createUser(params: {
   const user = repository.create({
     email: normalizedEmail,
     passwordHash: params.passwordHash,
+    openclawUrl: null,
   });
 
   const saved = await repository.save(user);
@@ -140,5 +142,21 @@ export async function markUserEmailAsVerified(userId: string): Promise<void> {
       isEmailVerified: true,
       emailVerifiedAt: new Date(),
     },
+  );
+}
+
+export async function updateUserOpenclawUrl(
+  userId: string,
+  openclawUrl: string | null,
+): Promise<void> {
+  const dataSource = await getDataSource();
+
+  await dataSource.query(
+    `
+      UPDATE users
+      SET openclaw_url = $1
+      WHERE id = $2
+    `,
+    [openclawUrl, userId],
   );
 }

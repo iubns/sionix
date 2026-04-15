@@ -13,7 +13,9 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
             AI 에이전트 대시보드
           </h1>
-          <p className="mt-2 text-lg text-slate-600">{user?.email}</p>
+          <p className="mt-2 text-lg text-slate-600" suppressHydrationWarning>
+            {user?.email ?? "로그인 정보를 불러오는 중..."}
+          </p>
         </div>
 
         {/* 상태 카드 */}
@@ -59,38 +61,99 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* 에이전트 관리 섹션 */}
-        <div className="mb-10">
-          <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-black text-slate-900">
-                  에이전트 관리
-                </h2>
-                <p className="mt-1 text-slate-600">
-                  AI 에이전트를 생성하고 관리해보세요.
-                </p>
+        {/* 사용자 정보 섹션 */}
+        <div className="mt-10 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-lg font-black text-slate-900">
+            에이전트 접속 주소
+          </h3>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            {user?.openclawUrl ? (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-slate-500">본인 접속 주소</p>
+                  <p
+                    className="mt-1 break-all font-medium text-slate-900"
+                    suppressHydrationWarning
+                  >
+                    {user.openclawUrl}
+                  </p>
+                </div>
+                <a
+                  href={user.openclawUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-sky-700"
+                >
+                  주소 열기
+                </a>
               </div>
-              <button className="rounded-lg bg-sky-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-sky-700">
-                + 새 에이전트 생성
-              </button>
-            </div>
-
-            {/* 에이전트 리스트 (빈 상태) */}
-            <div className="mt-8 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
-              <p className="text-lg font-medium text-slate-600">
-                생성된 에이전트가 없습니다.
+            ) : (
+              <p className="text-sm text-slate-500">
+                아직 등록된 주소가 없습니다.
               </p>
-              <p className="mt-1 text-sm text-slate-500">
-                &quot;새 에이전트 생성&quot; 버튼을 클릭하여 첫 번째 에이전트를
-                만들어보세요.
+            )}
+          </div>
+
+          <h3 className="mb-4 mt-8 text-lg font-black text-slate-900">
+            계정 정보
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="text-sm text-slate-500">이메일</p>
+              <p
+                className="mt-1 font-medium text-slate-900"
+                suppressHydrationWarning
+              >
+                {user?.email ?? "-"}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-slate-500">이메일 인증 상태</p>
+              <p className="mt-1">
+                {user?.isEmailVerified ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700">
+                    ✓ 인증됨
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-sm font-medium text-orange-700">
+                    ⚠ 미인증
+                  </span>
+                )}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-slate-500">가입일</p>
+              <p
+                className="mt-1 font-medium text-slate-900"
+                suppressHydrationWarning
+              >
+                {user?.createdAt
+                  ? new Date(user.createdAt).toLocaleDateString("ko-KR")
+                  : "알 수 없음"}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-slate-500">제공자</p>
+              <p
+                className="mt-1 font-medium text-slate-900"
+                suppressHydrationWarning
+              >
+                {user?.provider === "local" ? "로컬 계정" : user?.provider}
+              </p>
+            </div>
+            <div className="sm:col-span-2">
+              <p className="text-sm text-slate-500">에이전트 접속 주소</p>
+              <p
+                className="mt-1 break-all font-medium text-slate-900"
+                suppressHydrationWarning
+              >
+                {user?.openclawUrl ? user.openclawUrl : "미등록"}
               </p>
             </div>
           </div>
         </div>
-
         {/* 최근 활동 섹션 */}
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="mt-12 grid gap-8 lg:grid-cols-2">
           <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
             <h3 className="mb-4 text-lg font-black text-slate-900">
               최근 실행 이력
@@ -116,45 +179,6 @@ export default function DashboardPage() {
                   작업을 시작하세요.
                 </p>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 사용자 정보 섹션 */}
-        <div className="mt-10 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-black text-slate-900">계정 정보</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <p className="text-sm text-slate-500">이메일</p>
-              <p className="mt-1 font-medium text-slate-900">{user?.email}</p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">이메일 인증 상태</p>
-              <p className="mt-1">
-                {user?.isEmailVerified ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-sm font-medium text-emerald-700">
-                    ✓ 인증됨
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1 text-sm font-medium text-orange-700">
-                    ⚠ 미인증
-                  </span>
-                )}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">가입일</p>
-              <p className="mt-1 font-medium text-slate-900">
-                {user?.createdAt
-                  ? new Date(user.createdAt).toLocaleDateString("ko-KR")
-                  : "알 수 없음"}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">제공자</p>
-              <p className="mt-1 font-medium text-slate-900">
-                {user?.provider === "local" ? "로컬 계정" : user?.provider}
-              </p>
             </div>
           </div>
         </div>

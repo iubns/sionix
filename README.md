@@ -94,6 +94,8 @@ SMTP_FROM=no-reply@example.com
 psql "$DATABASE_URL" -f db/init.sql
 ```
 
+기존 DB에 컬럼이나 테이블 변경이 생기면 `db/migrations/` 아래 SQL을 추가하고 `pnpm run deploy` 또는 별도 마이그레이션 실행으로 반영합니다.
+
 ### 4) 개발 서버 실행
 
 ```bash
@@ -225,7 +227,7 @@ pnpm deploy   # 배포 스크립트 실행
 
 - TypeORM DataSource는 서버 런타임에서 싱글톤으로 초기화됩니다.
 - `synchronize`는 현재 `NODE_ENV !== "production"`일 때만 활성화됩니다.
-- 운영 환경에서는 마이그레이션 기반 관리 권장.
+- 운영 환경에서는 `db/migrations/` 기반으로 스키마 변경을 관리합니다.
 
 ## Troubleshooting
 
